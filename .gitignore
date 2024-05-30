@@ -1,0 +1,18 @@
+/.fleet
+/.idea
+/.vscode
+# /.env
+
+# /storage
+# /storage/*
+
+/vendor
+/vendor/*
+
+# .env
+# *.env
+
+composer.lock
+.vscode/sftp.json
+package.json
+# package-lock.json
