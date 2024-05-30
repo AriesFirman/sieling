@@ -11,7 +11,7 @@ class Telegram extends Model
 {
     use HasFactory;
 
-    const BOT_TOKEN = '';
+    const BOT_TOKEN = '5652350274:AAFM_MiVjuV0nH8rRRXZjsMYPXG0qcYZcYw';
 
     public static function sendMessage($chat_id, $message)
     {
