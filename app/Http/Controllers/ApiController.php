@@ -19,13 +19,9 @@ class ApiController extends Controller
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://tacticalpro.co.id/api/token/get',
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode(['user_id' => $user_id, 'secret' => $secret]),
             CURLOPT_HTTPHEADER => array(
@@ -64,13 +60,9 @@ class ApiController extends Controller
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://tacticalpro.co.id/api/presensi/lensa',
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => http_build_query(['start_date' => $start_date, 'end_date' => $end_date]),
             CURLOPT_HTTPHEADER => array(
@@ -120,8 +112,12 @@ class ApiController extends Controller
         }
     }
 
-    private function portal_login($user, $pass)
+    public static function portal_report_hr($user, $pass, $unit, $start_date, $end_date)
     {
+        $unit = $unit ? 109 : 0;
+        $start_date = $start_date ? date('Y-m-d', strtotime('-30 days')) : null;
+        $end_date = $end_date ? date('Y-m-d') : null;
+
         $curl = curl_init();
 
 		curl_setopt_array($curl, array(
@@ -130,11 +126,6 @@ class ApiController extends Controller
             CURLOPT_HEADER => true,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_ENCODING => '',
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => 'GET',
 		));
 		$response = curl_exec($curl);
@@ -164,13 +155,9 @@ class ApiController extends Controller
 		curl_setopt_array($curl, array(
 			CURLOPT_URL => "https://apps.telkomakses.co.id/portal/proses_login.php",
 			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
 			CURLOPT_POSTFIELDS => "nik=$user&password=$pass&id_captcha=$id_captcha&answer=$get_captcha_answer->answer&submit=",
 			CURLOPT_HTTPHEADER => array(
@@ -198,13 +185,9 @@ class ApiController extends Controller
 		curl_setopt_array($curl, array(
 			CURLOPT_URL => "https://apps.telkomakses.co.id/portal/proses_otp.php",
 			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
 			CURLOPT_POSTFIELDS => "otp=$otp&submit=",
 			CURLOPT_HTTPHEADER => array(
@@ -217,14 +200,9 @@ class ApiController extends Controller
 		curl_setopt_array($curl, array(
 			CURLOPT_URL => "https://apps.telkomakses.co.id/portal/home.php",
 			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HEADER => true,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
 			CURLOPT_POSTFIELDS => "nik=$user&password=$pass&submit=",
 			CURLOPT_HTTPHEADER => array(
@@ -238,18 +216,15 @@ class ApiController extends Controller
         $dom->loadHTML(trim($response));
 
         $linkElements = $dom->getElementsByTagName('a');
-		$targetKeyword = 'Presence & Leave';
+		$targetKeyword = 'Appraisal';
 		$url_present = null;
 
 		foreach ($linkElements as $linkElement)
 		{
 			if (stripos($linkElement->textContent, $targetKeyword) !== false)
 			{
-				if ($linkElement->getAttribute('href') != 'hr.php?url=present')
-				{
-					$url_present = $linkElement->getAttribute('href');
-					break;
-				}
+				$url_present = str_replace('https://apps.telkomakses.co.id/appraisal?code=', '', $linkElement->getAttribute('href'));
+                break;
 			}
 		}
 
@@ -265,15 +240,11 @@ class ApiController extends Controller
         curl_setopt_array($curl, array(
 			CURLOPT_URL => "https://apps.telkomakses.co.id/portal/save_user_log.php",
 			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
-			CURLOPT_POSTFIELDS => "aplikasi=PRESENT&nik=$user",
+			CURLOPT_POSTFIELDS => "aplikasi=ABSEN&nik=$user",
 			CURLOPT_HTTPHEADER => array(
 			  "Content-Type: application/x-www-form-urlencoded",
 			  "Cookie: ".$cookiesOut
@@ -282,21 +253,66 @@ class ApiController extends Controller
 		curl_exec($curl);
 
         curl_setopt_array($curl, array(
-			CURLOPT_URL => $url_present,
+			CURLOPT_URL => 'https://apps.telkomakses.co.id/absen/?code='.$url_present,
 			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
 			CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HEADER => true,
-			CURLOPT_ENCODING => "",
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "GET",
 			CURLOPT_HTTPHEADER => array(
 				"Cookie: $cookiesOut"
 			),
 		));
-		curl_exec($curl);
+		$response = curl_exec($curl);
+
+        curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://apps.telkomakses.co.id/absen/report_payroll_excel.php?unit='.$unit.'&tgl_awal='.$start_date.'&tgl_akhir='.$end_date,
+			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+			CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_CUSTOMREQUEST => "GET",
+			CURLOPT_HTTPHEADER => array(
+				"Cookie: $cookiesOut"
+			),
+		));
+		$response = curl_exec($curl);
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $dom->loadHTML(trim($response));
+        $table = $dom->getElementById('dataUserTables');
+        $rows = $table->getElementsByTagName('tr');
+
+        DB::table('portal_payroll')->truncate();
+
+        foreach ($rows as $row)
+        {
+            $cells = $row->getElementsByTagName('td');
+
+            if ($cells->length > 0)
+            {
+                $insert[] = [
+                    'nik'        => $cells->item(1)->nodeValue,
+                    'nama'       => $cells->item(2)->nodeValue,
+                    'unit'       => $cells->item(3)->nodeValue,
+                    'sub_unit'   => $cells->item(4)->nodeValue,
+                    'jhk'        => $cells->item(5)->nodeValue,
+                    'm'          => $cells->item(6)->nodeValue,
+                    'tm'         => $cells->item(7)->nodeValue,
+                    'hk'         => $cells->item(8)->nodeValue,
+                    'start_date' => $start_date,
+                    'end_date'   => $end_date
+                ];
+            }
+        }
+
+        foreach (array_chunk($insert, 500) as $numb => $item)
+        {
+            DB::table('portal_payroll')->insert($item);
+
+            print_r("saved page $numb and sleep (1)\n");
+
+            sleep(1);
+        }
     }
 }
