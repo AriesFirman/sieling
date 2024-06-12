@@ -9,7 +9,7 @@ date_default_timezone_set('Asia/Makassar');
 
 class Telegram extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
     const BOT_TOKEN = '5652350274:AAFM_MiVjuV0nH8rRRXZjsMYPXG0qcYZcYw';
 
@@ -22,11 +22,6 @@ class Telegram extends Model
         curl_setopt_array($curl, array(
             CURLOPT_URL            => "https://api.telegram.org/bot" . self::BOT_TOKEN . "/sendmessage?chat_id=$chat_id&text=$text&parse_mode=HTML",
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST  => "POST",
         ));
 
@@ -46,11 +41,6 @@ class Telegram extends Model
         curl_setopt_array($curl, array(
             CURLOPT_URL            => "https://api.telegram.org/bot" . self::BOT_TOKEN . "/sendmessage?chat_id=$chat_id&text=$text&parse_mode=HTML&reply_to_message_id=$message_id",
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST  => "POST",
         ));
 
@@ -68,11 +58,6 @@ class Telegram extends Model
         curl_setopt_array($curl, array(
             CURLOPT_URL            => "https://api.telegram.org/bot" . self::BOT_TOKEN . "/sendPhoto",
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => "",
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST  => "POST",
             CURLOPT_POSTFIELDS     => [
                 "chat_id"    => $chat_id,
