@@ -180,7 +180,7 @@ class ApiController extends Controller
 
         $otp = trim($line);
         fclose($handle);
-        print_r("response $otp\n\n");
+        // print_r("response $otp\n\n");
 
 		curl_setopt_array($curl, array(
 			CURLOPT_URL => "https://apps.telkomakses.co.id/portal/proses_otp.php",
@@ -211,9 +211,11 @@ class ApiController extends Controller
 			),
 		));
 		$response = curl_exec($curl);
+
 		libxml_use_internal_errors(true);
         $dom = new \DOMDocument();
         $dom->loadHTML(trim($response));
+        libxml_clear_errors();
 
         $linkElements = $dom->getElementsByTagName('a');
 		$targetKeyword = 'Appraisal';
@@ -263,7 +265,7 @@ class ApiController extends Controller
 				"Cookie: $cookiesOut"
 			),
 		));
-		$response = curl_exec($curl);
+		curl_exec($curl);
 
         curl_setopt_array($curl, array(
 			CURLOPT_URL => 'https://apps.telkomakses.co.id/absen/report_payroll_excel.php?unit='.$unit.'&tgl_awal='.$start_date.'&tgl_akhir='.$end_date,
@@ -277,9 +279,11 @@ class ApiController extends Controller
 			),
 		));
 		$response = curl_exec($curl);
+
         libxml_use_internal_errors(true);
         $dom = new \DOMDocument();
         $dom->loadHTML(trim($response));
+        libxml_clear_errors();
         $table = $dom->getElementById('dataUserTables');
         $rows = $table->getElementsByTagName('tr');
 
@@ -310,9 +314,79 @@ class ApiController extends Controller
         {
             DB::table('portal_payroll')->insert($item);
 
-            print_r("saved page $numb and sleep (1)\n");
+            // print_r("saved page $numb and sleep (1)\n");
 
             sleep(1);
         }
+
+        print_r("saved 'portal payroll' success\n");
+
+        curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://apps.telkomakses.co.id/absen/report_absen_excel.php?unit='.$unit.'&tgl_awal='.$start_date.'&tgl_akhir='.$end_date.'&pic_hr=&id_regional=&id_ket=w&id_sub_group=',
+			CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+			CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_CUSTOMREQUEST => "GET",
+			CURLOPT_HTTPHEADER => array(
+				"Cookie: $cookiesOut"
+			),
+		));
+		$response = curl_exec($curl);
+
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $dom->loadHTML(trim($response));
+        libxml_clear_errors();
+        $xpath = new \DOMXPath($dom);
+        $rows = $xpath->query('//table[@id="dataUserTables"]/tbody/tr');
+
+        DB::table('portal_rekap_absen')->truncate();
+
+        $data = [];
+        foreach ($rows as $row)
+        {
+            $columns = $row->getElementsByTagName('td');
+            $rowData = [];
+            foreach ($columns as $index => $column)
+            {
+                if ($index == 0)
+                {
+                    continue;
+                }
+                $rowData[] = $column->nodeValue;
+            }
+            $data[] = $rowData;
+        }
+
+        $columns = [
+            'nik',
+            'nama',
+            'position_name',
+            'level_posisi',
+            'psa',
+            'witel',
+            'regional',
+            'unit',
+            'sub_unit',
+            'group_fungsi',
+            'pic_hr',
+            'tanggal',
+            'jam_masuk',
+            'jam_pulang',
+            'keterangan',
+            'keterlambatan',
+            'overtime'
+        ];
+
+        $insertData = [];
+        foreach ($data as $rowData)
+        {
+            $insertData[] = array_combine($columns, $rowData);
+        }
+
+        DB::table('portal_rekap_absen')->insert($insertData);
+
+        print_r("saved 'portal rekap absen' success\n");
     }
 }
