@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Telegram;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\Telegram;
+use DB;
 
 date_default_timezone_set('Asia/Makassar');
 
@@ -89,11 +89,20 @@ class BotController extends Controller
 
                 Telegram::sendMessageReply($chat_id, $msg, $messageID);
             }
-            elseif (strpos($message, "/example") === 0)
+            elseif (strpos($message, "/whoami") === 0)
             {
-                $parameter = str_replace(array("/example","/example ", " "), "", $message);
+                $data = DB::table('master_employee')->where('chat_id', $chat_id)->first();
 
-                $msg = "ini isi parameter setelah command\n\n<code>$parameter</code>";
+                if ($data != null)
+                {
+                    $msg  = "NIK     : $data->nik\n";
+                    $msg .= "Nama    : $data->name\n";
+                    $msg .= "Chat ID : $data->chat_id\n";
+                }
+                else
+                {
+                    $msg = "who are u ?";
+                }
 
                 Telegram::sendMessageReply($chat_id, $msg, $messageID);
             }
