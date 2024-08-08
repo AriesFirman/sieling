@@ -1,18 +1,22 @@
 /.fleet
 /.idea
+
 /.vscode
-/.env
+.vscode/sftp.json
+
+# /.env
+# .env
 
 /storage
 /storage/*
 
-/vendor
-/vendor/*
+# /vendor
+# /vendor/*
 
-.env
-*.env
+/node_modules
+/node_modules/*
 
 composer.lock
-.vscode/sftp.json
+
 package.json
 package-lock.json
